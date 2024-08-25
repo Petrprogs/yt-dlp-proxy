@@ -1,0 +1,2 @@
+#!/bin/bash
+python3 "/mnt/sda2/Work/Projects/yt-dlp-proxy/main.py" $@
