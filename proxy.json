@@ -1,12 +1,62 @@
-{
-    "city": "Chicago 2",
-    "country": "USA",
-    "host": "107.152.38.99",
-    "new": false,
-    "paid": false,
-    "password": "L5KT7rSkCrxn8mm4HngTbK8f4k",
-    "port": "3128",
-    "premium": true,
-    "username": "chicago_squid_user",
-    "time": 30964.36
-}
+[
+    {
+        "city": "Chicago 2",
+        "country": "USA",
+        "host": "107.152.38.99",
+        "new": false,
+        "paid": false,
+        "password": "L5KT7rSkCrxn8mm4HngTbK8f4k",
+        "port": "3128",
+        "premium": true,
+        "username": "chicago_squid_user",
+        "time": 15.72
+    },
+    {
+        "city": "New York 2",
+        "country": "USA",
+        "host": "107.152.44.132",
+        "new": false,
+        "paid": false,
+        "password": "Xs6QjgCMeiGsX68KMdjnRJbmLmD",
+        "port": "3128",
+        "premium": true,
+        "username": "nc_squid_user",
+        "time": 17.03
+    },
+    {
+        "city": "New York 1",
+        "country": "USA",
+        "host": "107.152.43.179",
+        "new": false,
+        "paid": true,
+        "password": "pJTg94JCukVjz2b",
+        "port": "3128",
+        "premium": true,
+        "username": "ny_premium",
+        "time": 20.92
+    },
+    {
+        "city": "Hesse",
+        "country": "Germany",
+        "host": "162.19.230.101",
+        "new": false,
+        "paid": false,
+        "password": "enfo8BM3YDbGfyANYJRCKyL7hGrH",
+        "port": "3128",
+        "premium": false,
+        "username": "hesse_squid_user",
+        "time": 62594.22
+    },
+    {
+        "city": "London",
+        "country": "UK",
+        "host": "83.147.17.103",
+        "new": false,
+        "paid": false,
+        "password": "dsRLomjPDynq7mJQmhKX7QJCLid",
+        "port": "3128",
+        "premium": false,
+        "username": "london_squid_user",
+        "time": 62614.32
+    }
+]
