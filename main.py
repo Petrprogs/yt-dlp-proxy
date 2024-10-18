@@ -72,26 +72,38 @@ def update_proxies():
     f.write(json.dumps(best_proxy_json, indent=4))
   print("All done.")
 
-    
+
 def run_yt_dlp():
   proxy_url = ""
-  with open(os.path.abspath(__file__).split("main.py")[0]+"proxy.json", "r") as f:
-    proxy_dict = random.choice(json.load(f))
-    print(f"Using proxy based in {proxy_dict['city']}, {proxy_dict['country']}")
-    if proxy_dict["username"]:
-      proxy_url = f'{proxy_dict["username"]}:{proxy_dict["password"]}@{proxy_dict["host"]}:{proxy_dict["port"]}'
-    else:
-      proxy_url = f'{proxy_dict["host"]}:{proxy_dict["port"]}'
-  args = ["/bin/yt-dlp", "--proxy", proxy_url]+[str(arg) for arg in sys.argv]
-  subprocess.run(args)
+  error =  True
+  while error:
+    with open(os.path.abspath(__file__).split("main.py")[0]+"proxy.json", "r") as f:
+      proxy_dict = random.choice(json.load(f))
+      print(f"Using proxy based in {proxy_dict['city']}, {proxy_dict['country']}")
+      if proxy_dict["username"]:
+        proxy_url = f'{proxy_dict["username"]}:{proxy_dict["password"]}@{proxy_dict["host"]}:{proxy_dict["port"]}'
+      else:
+        proxy_url = f'{proxy_dict["host"]}:{proxy_dict["port"]}'
+    subprocess.run(f"yt-dlp --color always --proxy  '{proxy_url}' {" ".join([str(arg) for arg in sys.argv])} 2>&1 | tee tempout", shell=True)
+    with open("tempout", 'r') as log_fl:
+      if 'Sign in to' in  log_fl.readlines()[-1]:
+          error = True
+          print("Got 'Sign in to confirm' error. Trying again with another proxy...")
+      else:
+          error = False
+  os.remove("tempout") 
+
 
 def main():
-  if "update" in sys.argv:
-    update_proxies()
-  elif len(sys.argv) == 1:
-    print("usage: main.py update | <yt-dlp args> \n\nScript for starting yt-dlp with best free proxy\n\nCommands:\n update   Update best proxy\n")
-  else:
-    sys.argv.pop(0)
-    run_yt_dlp()
+  try:
+    if "update" in sys.argv:
+      update_proxies()
+    elif len(sys.argv) == 1:
+      print("usage: main.py update | <yt-dlp args> \n\nScript for starting yt-dlp with best free proxy\n\nCommands:\n update   Update best proxy\n")
+    else:
+      sys.argv.pop(0)
+      run_yt_dlp()
+  except KeyboardInterrupt:
+    print("Canceled by user")
 
 main()
