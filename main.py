@@ -1,4 +1,5 @@
 import requests
+import random
 import os
 import io
 import time
@@ -6,9 +7,11 @@ import sys
 import subprocess
 import json
 
+PROXIES_LIST = "https://nnp.nnchan.ru/mahoproxy.php?u=https://api.sandvpn.com/fetch-free-proxys"
+SPEEDTEST_URL = "http://212.183.159.230/5MB.zip"
+
 def get_proxies():
-    request = requests.get("https://nnp.nnchan.ru/mahoproxy.php?u=https://api.sandvpn.com/fetch-free-proxys")
-    print(request.text)
+    request = requests.get(PROXIES_LIST)
     if request.status_code == 200:
         return request.json()
     else:
@@ -17,7 +20,6 @@ def get_proxies():
 
 def get_best_proxy(proxy_json):
     proxy_times = []
-    proxy_json1 = proxy_json
     for i, item in enumerate(proxy_json):
         if item["host"] != "" and item["country"] != "Russia":
             proxy_str = ""
@@ -26,12 +28,12 @@ def get_best_proxy(proxy_json):
                 proxy_str = f'{item["username"]}:{item["password"]}@{item["host"]}:{item["port"]}'
             else:
                 proxy_str = f'{item["host"]}:{item["port"]}'
-            url = "http://212.183.159.230/5MB.zip"
             with io.BytesIO() as f:
                 start = time.perf_counter()
                 try:
-                    r = requests.get(url, stream=True, proxies={"http": proxy_str}, timeout=20)
+                    r = requests.get(SPEEDTEST_URL, stream=True, proxies={"http": proxy_str}, timeout=20)
                 except:
+                    print("Proxy is dead, skiping...")
                     del proxy_json[i]
                     continue
                 total_length = r.headers.get('content-length')
@@ -45,6 +47,7 @@ def get_best_proxy(proxy_json):
                         f.write(chunk)
                         done = int(30 * dl / int(total_length))
                         if done > 3 and (dl//(time.perf_counter() - start) / 100000) < 1.0:
+                            print("\nProxy is too slow, skiping...")
                             start = 500
                             break 
                         sys.stdout.write("\r[%s%s] %s Mbps" % ('=' * done, ' ' * (30-done), dl//(time.perf_counter() -
@@ -52,29 +55,29 @@ def get_best_proxy(proxy_json):
                 else:
                     del proxy_json[i]
                     continue
-            #print( f"\n10MB = {(time.perf_counter() - start):.2f} seconds")
                 item.update({"time": round(time.perf_counter() - start, 2)})
                 proxy_times.append(item)
+                print("\n")
             
         else:
             del proxy_json[i]
-    print(proxy_times)
-    min_value = min([item["time"] for item in proxy_times])
-    print(min_value)
-    for item in proxy_times:
-      if item["time"] == min_value:
-        return item
+
+    best_five_proxies = sorted(proxy_times, key=lambda x: x['time'])[:5]
+    return best_five_proxies
 
 def update_proxies():
   proxy_json = get_proxies()
   best_proxy_json = get_best_proxy(proxy_json)
   with open(os.path.abspath(__file__).split("main.py")[0]+"proxy.json", "w") as f:
     f.write(json.dumps(best_proxy_json, indent=4))
+  print("All done.")
+
     
 def run_yt_dlp():
   proxy_url = ""
   with open(os.path.abspath(__file__).split("main.py")[0]+"proxy.json", "r") as f:
-    proxy_dict = json.load(f)
+    proxy_dict = random.choice(json.load(f))
+    print(f"Using proxy based in {proxy_dict['city']}, {proxy_dict['country']}")
     if proxy_dict["username"]:
       proxy_url = f'{proxy_dict["username"]}:{proxy_dict["password"]}@{proxy_dict["host"]}:{proxy_dict["port"]}'
     else:
