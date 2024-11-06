@@ -1,2 +1,4 @@
 #!/bin/bash
-python3 "/mnt/sda2/Work/Projects/yt-dlp-proxy/main.py" $@
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$SCRIPT_DIR/main.py" "$@"
