@@ -1,8 +1,0 @@
-yt-dlp-proxy is a script to find the best proxy for yt-dlp to avoid throttling and bans
-
-How to use:
-  1. (Optional, do only if you have problems with next step) Open terminal and run "yt-dlp-proxy update". This will make a speed test for each free proxy and choose the best one.
-  2. Use script as you use yt-dlp! Just pass all arguments to yt-dlp-proxy, instead of yt-dlp. For example, "yt-dlp-proxy --format bv[vcodec^=avc!]+ba https://www.youtube.com/watch?v=bQB0_4BG-9F"
-  3. After some time proxy may become slow. In this case just run command from 1st step.
-  
-Also you can copy symlink "yt-dlp-proxy_link" to the dir you want for easier access to the script
