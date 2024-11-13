@@ -75,14 +75,15 @@ def download_with_progress(response, f, total_length, start_time):
         downloaded_bytes += len(chunk)
         f.write(chunk)
         done = int(30 * downloaded_bytes / int(total_length))
+        if done == 6:
+            break
         if (
             done > 3
             and (downloaded_bytes // (time.perf_counter() - start_time) / 100000) < 1.0
         ):
             print("\nProxy is too slow, skipping...")
             return float("inf"), downloaded_bytes
-        if done > 5:
-            break
+        
         sys.stdout.write(
             "\r[%s%s] %s Mbps"
             % (
@@ -128,7 +129,6 @@ def update_proxies():
             module_path = f'{"proxy_providers"}.{module_name}'
             module = importlib.import_module(module_path)
             classes = inspect.getmembers(module, inspect.isclass)
-            print(classes)
             providers.append(
                 [classs[-1]() for classs in classes if classs[0] != "ProxyProvider"][0]
             )
