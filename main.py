@@ -121,7 +121,7 @@ def get_best_proxies(providers):
 def update_proxies():
     """Update the proxies list and save the best ones."""
     providers = []
-    for filename in os.listdir("proxy_providers"):
+    for filename in os.listdir(os.path.join(os.path.dirname(__file__),"proxy_providers")):
         # Check if the file is a Python module
         if filename.endswith(".py") and filename != "__init__.py":
             module_name = filename[:-3]  # Remove the '.py' suffix
