@@ -1,6 +1,18 @@
 [
     {
-        "time": 7.21,
+        "time": 2.63,
+        "city": "Chicago 3",
+        "country": "USA",
+        "host": "107.152.38.47",
+        "new": false,
+        "paid": false,
+        "password": "yirXePSAqCE8jhLg88FBTfCz",
+        "port": "3128",
+        "premium": false,
+        "username": "chicago_squid_user_free"
+    },
+    {
+        "time": 2.74,
         "city": "New York 1",
         "country": "USA",
         "host": "107.152.43.179",
@@ -12,31 +24,7 @@
         "username": "ny_premium"
     },
     {
-        "time": 7.99,
-        "city": "Chicago 2",
-        "country": "USA",
-        "host": "107.152.38.99",
-        "new": false,
-        "paid": false,
-        "password": "L5KT7rSkCrxn8mm4HngTbK8f4k",
-        "port": "3128",
-        "premium": true,
-        "username": "chicago_squid_user"
-    },
-    {
-        "time": 12.86,
-        "city": "New York 2",
-        "country": "USA",
-        "host": "107.152.44.132",
-        "new": false,
-        "paid": false,
-        "password": "Xs6QjgCMeiGsX68KMdjnRJbmLmD",
-        "port": "3128",
-        "premium": true,
-        "username": "nc_squid_user"
-    },
-    {
-        "time": 13.09,
+        "time": 3.0,
         "city": "Los Angeles",
         "country": "USA",
         "host": "107.152.47.150",
@@ -48,15 +36,24 @@
         "username": "la_premium"
     },
     {
-        "time": Infinity,
-        "city": "Chicago 3",
-        "country": "USA",
-        "host": "107.152.38.47",
+        "time": 4.12,
+        "city": "Paris",
+        "country": "France",
+        "host": "193.31.41.173",
         "new": false,
         "paid": false,
-        "password": "yirXePSAqCE8jhLg88FBTfCz",
+        "password": "fF7NJfFfNG3jAtGJ4BM",
         "port": "3128",
         "premium": false,
-        "username": "chicago_squid_user_free"
+        "username": "h6mcyepaibbjdyer"
+    },
+    {
+        "time": 4.3,
+        "city": "Unknown city",
+        "country": "DE",
+        "host": "194.163.147.233",
+        "port": "14620",
+        "username": "vpnfree",
+        "password": "rerewtrfsdgdfg"
     }
 ]
