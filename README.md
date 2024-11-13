@@ -45,3 +45,51 @@ This will copy yt-dlp-proxy to /usr/bin, making it globally accessible.
 
 Now, you can simply type yt-dlp-proxy from any location in the terminal to use the script.
 ___
+
+### Creating custom proxy providers
+
+First you need to create new py file in proxy_providers directory using this code template:
+```
+import requests
+from proxy_provider import ProxyProvider
+
+class SomeProxyProvider(ProxyProvider):
+    """
+    Someproxy provider
+    """
+    PROXIES_LIST_URL = "https://goodproxies.net/list.json"
+
+    def fetch_proxies(self):
+        """Fetch proxies from goodproxies.net"""
+        response = requests.get(self.PROXIES_LIST_URL, timeout=5)
+        response.raise_for_status()
+        response_json = response.json()
+        return_list = []
+        for server in response_json["data"]["servers"]["10501"]["proxies"]:
+            return_list.append(
+                {
+                    "city": "Unknown city",
+                    "country": server["country"].upper(),
+                    "host": server["proxy"].split(":")[0],
+                    "port": server["proxy"].split(":")[1],
+                    "username": response_json["data"]["servers"]["10501"]["credentials"]["username"],
+                    "password": response_json["data"]["servers"]["10501"]["credentials"]["password"]
+                }
+            )
+        return return_list
+```
+As you can see, this script uses one json structure for all providers. In example code we've "converted" json response from server to python dictionary, compatible with yt-dlp-proxy. Here is basic example of json structure yt-dlp-proxy uses:
+```
+[
+  {
+    "city": "City1",
+    "country": "Country1",
+    "host": "0.0.0.0",
+    "password": "password123",
+    "port": "proxy_port",
+    "username": "squid_username"
+  }
+]
+```
+Please note that all proxy providers are loaded automatically and you don't need to import them manually in ```main.py```
+
