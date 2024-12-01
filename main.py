@@ -8,8 +8,10 @@ import subprocess
 import json
 import importlib
 import inspect
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from proxy_provider import ProxyProvider
 from proxy_providers import *
+from tqdm import tqdm
 
 PROXIES_LIST_URL = (
     "https://nnp.nnchan.ru/mahoproxy.php?u=https://api.sandvpn.com/fetch-free-proxys"
@@ -41,8 +43,6 @@ def construct_proxy_string(proxy):
 def test_proxy(proxy):
     """Test the proxy by measuring the download time."""
     proxy_str = construct_proxy_string(proxy)
-    print(f"Testing {proxy_str}")
-
     start_time = time.perf_counter()
     try:
         response = requests.get(
@@ -55,7 +55,6 @@ def test_proxy(proxy):
 
         total_length = response.headers.get("content-length")
         if total_length is None or int(total_length) != 5242880:
-            print("No content or unexpected content size.")
             return None
 
         with io.BytesIO() as f:
@@ -64,7 +63,6 @@ def test_proxy(proxy):
             )
             return {"time": download_time, **proxy}  # Include original proxy info
     except requests.RequestException:
-        print("Proxy is dead, skipping...")
         return None
 
 
@@ -81,18 +79,7 @@ def download_with_progress(response, f, total_length, start_time):
             done > 3
             and (downloaded_bytes // (time.perf_counter() - start_time) / 100000) < 1.0
         ):
-            print("\nProxy is too slow, skipping...")
             return float("inf"), downloaded_bytes
-        
-        sys.stdout.write(
-            "\r[%s%s] %s Mbps"
-            % (
-                "=" * done,
-                " " * (5 - done),
-                downloaded_bytes // (time.perf_counter() - start_time) / 100000,
-            )
-        )
-    sys.stdout.write("\n")
     return round(time.perf_counter() - start_time, 2), downloaded_bytes
 
 
@@ -105,6 +92,7 @@ def save_proxies_to_file(proxies, filename="proxy.json"):
 def get_best_proxies(providers):
     """Return the top five proxies based on speed from all providers."""
     all_proxies = []
+    proxies = None
     for provider in providers:
         try:
             print(f"Fetching proxies from {provider.__class__.__name__}")
@@ -113,16 +101,20 @@ def get_best_proxies(providers):
         except Exception as e:
             print(f"Failed to fetch proxies from {provider.__class__.__name__}: {e}")
 
-    return sorted(
-        filter(None, [test_proxy(proxy) for proxy in all_proxies]),
-        key=lambda x: x["time"],
-    )[:5]
+    best_proxies = []
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        futures = {executor.submit(test_proxy, proxy): proxy for proxy in all_proxies}
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Testing proxies", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_noinv_fmt}]", unit=' proxies', unit_scale=True, ncols=80):
+            result = future.result()
+            if result is not None:
+                best_proxies.append(result)
+    return sorted(best_proxies, key=lambda x: x["time"])[:5]
 
 
 def update_proxies():
     """Update the proxies list and save the best ones."""
     providers = []
-    for filename in os.listdir(os.path.join(os.path.dirname(__file__),"proxy_providers")):
+    for filename in os.listdir(os.path.join(os.path.dirname(__file__), "proxy_providers")):
         # Check if the file is a Python module
         if filename.endswith(".py") and filename != "__init__.py":
             module_name = filename[:-3]  # Remove the '.py' suffix
@@ -153,7 +145,7 @@ def run_yt_dlp():
 
 def execute_yt_dlp_command(proxy_str):
     """Execute the yt-dlp command with the given proxy."""
-    command = f"yt-dlp --color always --proxy  '{proxy_str}' {" ".join([str(arg) for arg in sys.argv])} 2>&1 | tee tempout"
+    command = f"yt-dlp --color always --proxy '{proxy_str}' {" ".join([str(arg) for arg in sys.argv])} 2>&1 | tee tempout"
     subprocess.run(command, shell=True)
     with open("tempout", "r") as log_fl:
         log_text = log_fl.read()
