@@ -13,18 +13,7 @@ from proxy_provider import ProxyProvider
 from proxy_providers import *
 from tqdm import tqdm
 
-PROXIES_LIST_URL = (
-    "https://nnp.nnchan.ru/mahoproxy.php?u=https://api.sandvpn.com/fetch-free-proxys"
-)
 SPEEDTEST_URL = "http://212.183.159.230/5MB.zip"
-
-
-def fetch_proxies():
-    """Fetch the list of proxies from the defined URL."""
-    response = requests.get(PROXIES_LIST_URL)
-    response.raise_for_status()
-    return response.json()
-
 
 def is_valid_proxy(proxy):
     """Check if the proxy is valid."""
@@ -145,7 +134,7 @@ def run_yt_dlp():
 
 def execute_yt_dlp_command(proxy_str):
     """Execute the yt-dlp command with the given proxy."""
-    command = f"yt-dlp --color always --proxy '{proxy_str}' {" ".join([str(arg) for arg in sys.argv])} 2>&1 | tee tempout"
+    command = f"yt-dlp --color always --proxy http://{proxy_str} {' '.join([str(arg) for arg in sys.argv])} 2>&1 | tee tempout"
     subprocess.run(command, shell=True)
     with open("tempout", "r") as log_fl:
         log_text = log_fl.read()
