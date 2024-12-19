@@ -113,7 +113,6 @@ def update_proxies():
             providers.append(
                 [classs[-1]() for classs in classes if classs[0] != "ProxyProvider"][0]
             )
-    print(providers)
     best_proxies = get_best_proxies(providers)
     save_proxies_to_file(best_proxies)
     print("All done.")
@@ -122,14 +121,19 @@ def update_proxies():
 def run_yt_dlp():
     """Run yt-dlp with a randomly selected proxy."""
     while True:
-        with open("proxy.json", "r") as f:
-            proxy = random.choice(json.load(f))
-            proxy_str = construct_proxy_string(proxy)
-            print(f"Using proxy from {proxy['city']}, {proxy['country']}")
+        try:
+            with open("proxy.json", "r") as f:
+                proxy = random.choice(json.load(f))
+                proxy_str = construct_proxy_string(proxy)
+                print(f"Using proxy from {proxy['city']}, {proxy['country']}")
 
-            if execute_yt_dlp_command(proxy_str):
-                break  # Exit loop if command was successful
-            print("Got 'Sign in to confirm' error. Trying again with another proxy...")
+                if execute_yt_dlp_command(proxy_str):
+                    os.remove("tempout")
+                    break  # Exit loop if command was successful
+                print("Got 'Sign in to confirm' error. Trying again with another proxy...")
+        except FileNotFoundError as e:
+            print("'proxy.json' not found. Starting proxy list update...")
+            update_proxies()
 
 
 def execute_yt_dlp_command(proxy_str):
