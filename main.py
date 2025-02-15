@@ -17,7 +17,7 @@ SPEEDTEST_URL = "http://212.183.159.230/5MB.zip"
 
 def is_valid_proxy(proxy):
     """Check if the proxy is valid."""
-    return proxy.get("host") is not None and proxy.get("country") != "Russia"
+    return proxy.get("host") is not None and proxy.get("country") != "Russia" and proxy.get("country") != "RU"
 
 
 def construct_proxy_string(proxy):
