@@ -15,6 +15,11 @@ from tqdm import tqdm
 
 SPEEDTEST_URL = "http://212.183.159.230/5MB.zip"
 
+if getattr(sys, 'frozen', False):
+    application_path = os.path.dirname(sys.executable)
+elif __file__:
+    application_path = os.path.dirname(__file__)
+
 def is_valid_proxy(proxy):
     """Check if the proxy is valid."""
     return proxy.get("host") is not None and proxy.get("country") != "Russia" and proxy.get("country") != "RU"
@@ -74,8 +79,10 @@ def download_with_progress(response, f, total_length, start_time):
 
 def save_proxies_to_file(proxies, filename="proxy.json"):
     """Save the best proxies to a JSON file."""
-    with open(os.path.join(os.path.dirname(__file__), filename), "w") as f:
+    json_path = os.path.join(os.path.split(application_path)[0], filename)
+    with open(json_path, "w") as f:
         json.dump(proxies, f, indent=4)
+    print(f"proxies.json saved to {json_path}")
 
 
 def get_best_proxies(providers):
@@ -122,7 +129,7 @@ def run_yt_dlp():
     """Run yt-dlp with a randomly selected proxy."""
     while True:
         try:
-            with open("proxy.json", "r") as f:
+            with open(os.path.join(os.path.split(application_path)[0], "proxy.json"), "r") as f:
                 proxy = random.choice(json.load(f))
                 proxy_str = construct_proxy_string(proxy)
                 print(f"Using proxy from {proxy['city']}, {proxy['country']}")
