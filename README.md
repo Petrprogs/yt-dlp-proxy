@@ -25,6 +25,12 @@ yt-dlp-proxy update
 
 This will also perform a speed test for each free proxy and select the best one available.
 
+By default, yt-dlp-proxy uses only two parallel threads to test the proxy, but using the `--max-workers` parameter, you can set the desired number of worker threads to speed up proxy testing. Before setting this parameter, make sure that your Internet bandwidth allows you to do this.
+
+```bash
+yt-dlp-proxy update --max-workers 10
+```
+
 #### Download with yt-dlp-proxy
 Use yt-dlp-proxy just like you would use yt-dlp! Pass all the arguments to yt-dlp-proxy instead.
 Example:
