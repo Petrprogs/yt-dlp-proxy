@@ -82,10 +82,10 @@ def save_proxies_to_file(proxies, filename="proxy.json"):
     json_path = os.path.join(os.path.split(application_path)[0], filename)
     with open(json_path, "w") as f:
         json.dump(proxies, f, indent=4)
-    print(f"proxies.json saved to {json_path}")
+    print(f"proxy.json saved to {json_path}")
 
 
-def get_best_proxies(providers):
+def get_best_proxies(providers, max_workers):
     """Return the top five proxies based on speed from all providers."""
     all_proxies = []
     proxies = None
@@ -98,7 +98,7 @@ def get_best_proxies(providers):
             print(f"Failed to fetch proxies from {provider.__class__.__name__}: {e}")
 
     best_proxies = []
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(test_proxy, proxy): proxy for proxy in all_proxies}
         for future in tqdm(as_completed(futures), total=len(futures), desc="Testing proxies", bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_noinv_fmt}]", unit=' proxies', unit_scale=True, ncols=80):
             result = future.result()
@@ -107,7 +107,7 @@ def get_best_proxies(providers):
     return sorted(best_proxies, key=lambda x: x["time"])[:5]
 
 
-def update_proxies():
+def update_proxies(max_workers = 2):
     """Update the proxies list and save the best ones."""
     providers = []
     for filename in os.listdir(os.path.join(os.path.dirname(__file__), "proxy_providers")):
@@ -120,7 +120,8 @@ def update_proxies():
             providers.append(
                 [classs[-1]() for classs in classes if classs[0] != "ProxyProvider"][0]
             )
-    best_proxies = get_best_proxies(providers)
+    print(f"Using up to {max_workers} concurrent threads")    
+    best_proxies = get_best_proxies(providers, max_workers)
     save_proxies_to_file(best_proxies)
     print("All done.")
 
@@ -156,10 +157,17 @@ def main():
     """Main function to handle script arguments and execute the appropriate command."""
     try:
         if "update" in sys.argv:
-            update_proxies()
+            if "--max-workers" in sys.argv:
+                max_workers = int(sys.argv[sys.argv.index("--max-workers")+1])
+            else:
+                max_workers = 2
+            update_proxies(max_workers)
         elif len(sys.argv) < 2:
             print(
-                "usage: main.py update | <yt-dlp args> \nScript for starting yt-dlp with best free proxy\nCommands:\n update   Update best proxy"
+                "usage: main.py update [--max-workers NUM] | <yt-dlp args>\n" \
+           "Script for starting yt-dlp with best free proxy\n\n" \
+           "Commands:\n" \
+           "  update   Update best proxy [--max-workers NUM]"
             )
         else:
             sys.argv.pop(0)
