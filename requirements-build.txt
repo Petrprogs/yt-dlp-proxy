@@ -1,0 +1,10 @@
+# Build dependencies for yt-dlp-proxy
+# These are additional dependencies needed for building the binary
+
+# PyInstaller for creating standalone executables
+pyinstaller>=5.13.0
+
+# Development dependencies
+pytest>=7.0.0
+black>=23.0.0
+flake8>=6.0.0 
