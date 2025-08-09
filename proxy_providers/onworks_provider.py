@@ -8,7 +8,7 @@ class VPNOnlineProvider(ProxyProvider):
     PROXIES_LIST_URL = "https://www.onworks.net/vpn.json?v=07"
 
     def fetch_proxies(self):
-        """Fetch proxies from SandVPN."""
+        """Fetch proxies from OnWorks."""
         response = requests.get(self.PROXIES_LIST_URL, timeout=5)
         response.raise_for_status()
         response_json = response.json()

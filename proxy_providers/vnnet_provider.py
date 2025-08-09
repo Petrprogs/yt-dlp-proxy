@@ -5,10 +5,10 @@ class VNNetProvider(ProxyProvider):
     """
     Fetch proxies from VNNet browser extension
     """
-    PROXIES_LIST_URL = "https://poteto.ru/servers.json"
+    PROXIES_LIST_URL = "https://vnnet.icu/servers.json"
 
     def fetch_proxies(self):
-        """Fetch proxies from SandVPN."""
+        """Fetch proxies from VNNet."""
         response = requests.get(self.PROXIES_LIST_URL, timeout=10)
         response.raise_for_status()
         response_json = response.json()
