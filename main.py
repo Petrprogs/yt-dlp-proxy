@@ -22,16 +22,34 @@ elif __file__:
 
 def is_valid_proxy(proxy):
     """Check if the proxy is valid."""
-    return proxy.get("host") is not None and proxy.get("country") != "Russia" and proxy.get("country") != "RU"
+    blocked_countries = [
+        "China", "CN",
+        "North Korea", "KP",
+        "Iran", "IR",
+        "Turkmenistan", "TM",
+        "Eritrea", "ER",
+        "Syria", "SY",
+        "Russia", "RUS", "RU"
+        # Add other countries as needed
+    ]
+    country = proxy.get("country")
+    return (
+        proxy.get("host") is not None and
+        country not in blocked_countries
+    )
 
 
 def construct_proxy_string(proxy):
-    """Construct a proxy string from the proxy dictionary."""
+    """Construct a proxy string from the proxy dictionary, including protocol if available."""
+    protocol = proxy.get("protocol")
     if proxy.get("username"):
-        return (
-            f'{proxy["username"]}:{proxy["password"]}@{proxy["host"]}:{proxy["port"]}'
-        )
-    return f'{proxy["host"]}:{proxy["port"]}'
+        auth_part = f'{proxy["username"]}:{proxy["password"]}@'
+    else:
+        auth_part = ''
+    if protocol:
+        return f'{protocol}://{auth_part}{proxy["host"]}:{proxy["port"]}'
+    else:
+        return f'http://{auth_part}{proxy["host"]}:{proxy["port"]}'
 
 
 def test_proxy(proxy):
@@ -42,7 +60,7 @@ def test_proxy(proxy):
         response = requests.get(
             SPEEDTEST_URL,
             stream=True,
-            proxies={"http": f"http://{proxy_str}"},
+            proxies={"http": proxy_str},
             timeout=5,
         )
         response.raise_for_status()  # Ensure we raise an error for bad responses
@@ -138,7 +156,7 @@ def run_yt_dlp():
                 if execute_yt_dlp_command(proxy_str):
                     os.remove("tempout")
                     break  # Exit loop if command was successful
-                print("Got 'Sign in to confirm' error. Trying again with another proxy...")
+                print("Got error. Trying again with another proxy...")
         except FileNotFoundError as e:
             print("'proxy.json' not found. Starting proxy list update...")
             update_proxies()
@@ -146,11 +164,11 @@ def run_yt_dlp():
 
 def execute_yt_dlp_command(proxy_str):
     """Execute the yt-dlp command with the given proxy."""
-    command = f"yt-dlp --color always --proxy http://{proxy_str} {' '.join([str(arg) for arg in sys.argv])} 2>&1 | tee tempout"
+    command = f"yt-dlp --color always --proxy {proxy_str} {' '.join([str(arg) for arg in sys.argv])} 2>&1 | tee tempout"
     subprocess.run(command, shell=True)
     with open("tempout", "r") as log_fl:
         log_text = log_fl.read()
-        return "Sign in to" not in log_text and "403" not in log_text
+        return "Sign in to" not in log_text and "403" not in log_text and "video is available in" not in log_text and "Unable to connect to proxy" not in log_text
 
 
 def main():
